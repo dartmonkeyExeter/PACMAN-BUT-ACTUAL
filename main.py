@@ -9,16 +9,17 @@ size = [560, 640]
 screen = pygame.display.set_mode(size)
 pygame.display.set_caption("pacman!!!!")
 
+game_start = False
 spawn_fruit = True
 
 level = 0
 
 pacman = pacmanclass.Pacman()
 
-blinky = ghostclass.Ghost((255, 0, 0), (11*20)+4, (12*20)+4, "right")
-pinky = ghostclass.Ghost((255, 184, 255), (16*20)+4, (12*20)+4, "left")
-inky = ghostclass.Ghost((0, 255, 255), (11*20)+4, (14*20)+4, "right")
-clyde = ghostclass.Ghost((255, 184, 82), (16*20)+4, (14*20)+4, "left")
+blinky = ghostclass.Ghost((255, 0, 0), (11*20)+4, (13*20)+4, "right")
+pinky = ghostclass.Ghost((255, 184, 255), (16*20)+4, (13*20)+4, "left")
+inky = ghostclass.Ghost((0, 255, 255), (11*20)+4, (15*20)+4, "right")
+clyde = ghostclass.Ghost((255, 184, 82), (16*20)+4, (15*20)+4, "left")
 
 ghosts = [blinky, pinky, inky, clyde]
 
@@ -29,7 +30,7 @@ fruits = []
 grid = gridclass.Grid()
 
 def update_all():
-    global level, spawn_fruit
+    global level, spawn_fruit, game_start
     dots_left = grid.dots_left()
 
     if (dots_left == 170 or dots_left == 70) and spawn_fruit:
@@ -46,6 +47,8 @@ def update_all():
         for ghost in ghosts:
             ghost.x = ghost.start_pos[0] * 20
             ghost.y = ghost.start_pos[1] * 20
+            ghost.path = []
+            ghost.direction = ghost.starting_direction
         grid.grid = copy.deepcopy(grid.copygrid)
     pacman.move()
     pacman.clamping(grid)

@@ -3,7 +3,7 @@ import pygame, math
 class Pacman:
     def __init__(self):
         self.x = 280
-        self.y = 330
+        self.y = 350
         self.radius = 8
         self.color = (255, 255, 0)
         self.direction = "left"
@@ -15,6 +15,7 @@ class Pacman:
         self.power_pellet_clock = 0
         self.score = 0
         self.ghosts_eaten = 0
+        self.lives = 3
 
     def draw(self, screen):
         pygame.draw.circle(screen, self.color, (self.x, self.y), self.radius)
@@ -31,6 +32,23 @@ class Pacman:
             vertices.append((x, y))
 
         pygame.draw.polygon(screen, (0, 0, 0), vertices)
+
+        # draw lives
+        for i in range(self.lives):
+            pygame.draw.circle(screen, (255, 255, 0), (20 + (i * 20), 620), 8)
+            start_angle = math.radians((-45))
+            end_angle = math.radians((45))
+            center = (20 + (i * 20), 620)
+            vertices = [center]
+            num_vertices = 30 
+            angle_step = (end_angle - start_angle) / num_vertices
+            for i in range(num_vertices + 1):
+                angle = start_angle + i * angle_step
+                x = center[0] + self.radius * math.cos(angle)
+                y = center[1] + self.radius * math.sin(angle)
+                vertices.append((x, y))
+
+            pygame.draw.polygon(screen, (0, 0, 0), vertices)
 
     def move(self):
         if self.direction == "right":
@@ -81,30 +99,41 @@ class Pacman:
         if current_array[int(self.x / 20)] == ".":
             current_array[int(self.x / 20)] = " "
             self.score += 10
-        if current_array[int(self.x / 20)] == "*":
+            pygame.mixer.Sound.play(pygame.mixer.Sound("sounds/pacman_chomp.wav"))
+        elif current_array[int(self.x / 20)] == "*":
             current_array[int(self.x / 20)] = " "
             for ghost in ghost_list:
                 ghost.edible = True
             self.power_pellet_clock = frames_per_second * 10
             self.score += 50
+            pygame.mixer.Sound.play(pygame.mixer.Sound("sounds/pacman_chomp.wav"))
+
         
         grid.grid[int(self.y / 20)] = "".join(current_array)
 
         for ghost in ghost_list:
-            if (int(ghost.x / 20), int(ghost.y / 20)) == (int(self.x / 20), int(self.y / 20)) and not ghost.edible:
-                self.x = 280
-                self.y = 330
-                self.score -= 100
-                reset = True
-            elif (int(ghost.x / 20), int(ghost.y / 20)) == (int(self.x / 20), int(self.y / 20)) and ghost.edible:
-                ghost.x = ghost.start_pos[0] * 20
-                ghost.y = ghost.start_pos[1] * 20
-                ghost.edible = False
-                ghost.path = None
-                self.score += 200 * (self.ghosts_eaten + 1)
-                self.ghosts_eaten += 1
+            if (int(ghost.x / 20), int(ghost.y / 20)) == (int(self.x / 20), int(self.y / 20)):
+                if not ghost.edible:
+                    # Pac-Man collides with a non-edible ghost
+                    self.lives -= 1
+                    reset = True
+                else:
+                    # Pac-Man collides with an edible ghost
+                    # Reset the ghost's position
+                    ghost.x = ghost.start_pos[0] * 20
+                    ghost.y = ghost.start_pos[1] * 20
+                    ghost.edible = False
+                    ghost.path = None
+                    # Update Pac-Man's score
+                    self.score += 200 * (self.ghosts_eaten + 1)
+                    self.ghosts_eaten += 1
 
         if reset:
+            # Reset Pac-Man's position
+            self.x = 280
+            self.y = 350
+            self.direction = "left"
+            # Reset all ghosts' positions and states
             for ghost in ghost_list:
                 ghost.x = ghost.start_pos[0] * 20
                 ghost.y = ghost.start_pos[1] * 20

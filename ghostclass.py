@@ -4,6 +4,7 @@ class Ghost:
     def __init__(self, color, x, y, starting_dir):
         self.x = x
         self.y = y
+        self.starting_direction = starting_dir
         self.direction = starting_dir
         self.speed = 2.0
         self.color = color
@@ -47,7 +48,6 @@ class Ghost:
 
     def move(self):
         try:
-            curr_arr = (int(round(self.x / 20)), int(round(self.y / 20)))
             next_node = self.path[0]
 
             if abs(self.x - next_node[0] * 20) < self.speed and abs(self.y - next_node[1] * 20) < self.speed:
@@ -92,7 +92,7 @@ class Ghost:
             ghost_array = (int(self.x / 20), int(self.y / 20))
             pacman_array = (int(pacman.x / 20), int(pacman.y / 20))
             while True:
-                random_pos = (random.randint(0, 27), random.randint(0, 29))
+                random_pos = (random.randint(1, 26), random.randint(1, 28))
                 distance = abs(random_pos[0] - pacman_array[0]) + abs(random_pos[1] - pacman_array[1])
                 err = []
                 while grid.nodemap[random_pos[1]][random_pos[0]] == "#" and distance > 20:
